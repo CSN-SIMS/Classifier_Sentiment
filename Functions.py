@@ -165,19 +165,19 @@ def printAndTrainClassifiers(trainingset, testingset, classifier, MNB_classifier
     print("voted_classifier accuracy percent:", (nltk.classify.accuracy(voted_classifier, testingset)) * 100)
 
     return voted_classifier
-
+"""
 def find_testfeatures(testdoc, test_features):
     words = word_tokenize(testdoc)
     testingfeatures = {}
     for w in test_features:
         testingfeatures[w] = (w in words) #Värt att titta på...
     return testingfeatures
-
+"""
 #Print all classifications and their confidence
 def printVoteConfidence(voted_classifier, testingset):
     for i in testingset:
         print("Classification:", voted_classifier.classify(i[0]), "Confidence %:",voted_classifier.confidence(i[0])*100)
-
+"""
 def find_features(document, wordfeatures):
     words = set(document)
     features = {}
@@ -185,7 +185,7 @@ def find_features(document, wordfeatures):
         features[w] = (w in words)
 
     return features
-
+"""
 def loadPremadeMovieReviews():
     all_words = []
 
@@ -194,3 +194,100 @@ def loadPremadeMovieReviews():
     all_words = nltk.FreqDist(all_words)
     word_features = list(all_words.keys())[:3000]
     return word_features
+
+def find_features(document, wordfeatures):
+    words = word_tokenize(document)
+    features = {}
+    for w in wordfeatures:
+        features[w] = (w in words)
+    return features
+
+
+def loadDatasetFromSingleFiles(posfile, negfile):
+    short_pos = open(posfile, "r", encoding = "ISO-8859-1").read()
+    short_neg = open(negfile, "r", encoding = "ISO-8859-1").read()
+
+    documents = []
+    all_words = []
+
+    #J = Adjectives, this has to be changed for when the dataset is in swedish.
+    allowed_word_types = ["J"]
+
+
+    for r in short_pos.split('\n'):
+        documents.append((r, "pos"))
+        words = word_tokenize(r)
+        pos = nltk.pos_tag(words)
+        for w in pos:
+            if w[1][0] in allowed_word_types:
+                all_words.append(w[0].lower())
+
+    for r in short_neg.split('\n'):
+        documents.append((r, "neg"))
+        words = word_tokenize(r)
+        pos = nltk.pos_tag(words)
+        for w in pos:
+            if w[1][0] in allowed_word_types:
+                all_words.append(w[0].lower())
+
+
+    #short_pos_words = word_tokenize(short_pos)
+    #short_neg_words = word_tokenize(short_neg)
+
+    all_words = nltk.FreqDist(all_words)
+    word_features = list(all_words.keys())[:5000]
+    savePickle(word_features, "word_features.pickle")
+    savePickle(documents, "documents.pickle")
+
+    featuresets = [(find_features(rev, word_features), category) for (rev,category) in documents]
+    random.shuffle(featuresets)
+    return featuresets
+
+def sentiment(text, voted_classifier, wordfeatures):
+    feats = find_features(text, wordfeatures)
+
+    return voted_classifier.classify(feats), voted_classifier.confidence(feats)
+
+#Ändra efter språkändring, fixa så att bara txt filer tas in.
+def loadTextfilesForAnalysis(directory):
+
+    messageso = []
+    fileNames = []
+    stop_words = list(set(stopwords.words('english')))
+    #allowed_word_types = ["J"]
+
+    files = os.listdir(directory)
+    for file in files:
+        fileNames.append(file)
+
+    files = [open(directory + "/" + f, 'r').read() for f in files]
+
+    for p in files:
+        p.replace('\n', '')#Fungerar inte just nu
+        print(p)
+        print("______")
+        messageso.append(p)
+
+    finalResult = list(zip(fileNames, messageso))
+
+    for filename, message in finalResult:
+        print(filename, "contains", message)
+        print("new itteration of for loop.")
+
+    return finalResult
+
+#Gör den zippad istället för lista av listor...
+def analyseListOfMessages(sentimentResults, wordfeatures, voted_classifier):
+    sentimentResultList = []
+    for filename, message in sentimentResults:
+        result = sentiment(message, voted_classifier, wordfeatures)
+        print("Judgement and confidence: ", result)
+        temp = [filename, result]
+        sentimentResultList.append(temp)
+
+    return sentimentResultList
+
+def printSentimentList(sentimentList):
+    print("blablabla")
+    for result in sentimentList:
+        print(result[0], " classified as: ", result[1])
