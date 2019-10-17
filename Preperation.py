@@ -1,8 +1,13 @@
-from Functions import *
+from PrepFunctions import *
 
+""""
 featuresets = loadDatasetFromSingleFiles("positive.txt", "negative.txt")
 training_set = featuresets[:10000]
 testing_set = featuresets[10000:]
+print("Lenght of trainingset:", len(training_set))
+print("Lenght of testingset:", len(testing_set))
+savePickle(training_set, "trainingset.pickle")
+savePickle(testing_set, "testingset.pickle")
 
 classifier = nltk.NaiveBayesClassifier.train(training_set)
 savePickle(classifier, "picklefiles_eng/basicClassifier.pickle")
@@ -47,7 +52,10 @@ print("NuSVC classifier saved")
 #print("LinearSVC_classifier accuracy percent:", (nltk.classify.accuracy(LinearSVC_classifier, testing_set))*100)
 #print("NuSVC_classifier accuracy percent:", (nltk.classify.accuracy(NuSVC_classifier, testing_set))*100)
 #print("voted_classifier accuracy percent:", (nltk.classify.accuracy(voted_classifier, testing_set)) * 100)
-
-messageList = loadTextfilesToList("textfiles")
+"""
+#messageList = loadTextfilesToList("textfiles")
+#translatedMessageList = translateMessageListToEnglish(messageList)
+#savePickle(translatedMessageList, "translatedmessages.pickle")
+messageList = loadMultipleDirectoriesToOneList("outputEmails")
 translatedMessageList = translateMessageListToEnglish(messageList)
-savePickle(translatedMessageList, "translatedmessages.pickle")
+savePickle(translatedMessageList, "picklefiles_eng/translatedmessages.pickle")
