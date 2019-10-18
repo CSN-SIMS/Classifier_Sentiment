@@ -1,5 +1,6 @@
 from PrepFunctions import *
 
+swe = True
 """"
 featuresets = loadDatasetFromSingleFiles("positive.txt", "negative.txt")
 training_set = featuresets[:10000]
@@ -57,5 +58,8 @@ print("NuSVC classifier saved")
 #translatedMessageList = translateMessageListToEnglish(messageList)
 #savePickle(translatedMessageList, "translatedmessages.pickle")
 messageList = loadMultipleDirectoriesToOneList("outputEmails")
-translatedMessageList = translateMessageListToEnglish(messageList)
-savePickle(translatedMessageList, "picklefiles_eng/translatedmessages.pickle")
+if(swe):
+    translatedMessageList = translateMessageListToEnglish(messageList)
+    savePickle(translatedMessageList, "picklefiles_eng/translatedmessages.pickle")
+else:
+    savePickle(messageList)

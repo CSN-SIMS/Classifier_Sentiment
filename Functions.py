@@ -90,6 +90,10 @@ def saveExcelFormat(judgementList, sheetname, percentages, filename, append = Fa
         sentimentList = []
         wb = load_workbook(filename)
         ws = wb.get_sheet_by_name(sheetname)
+        ws.cell(1, 1, "Filename")
+        ws.cell(1, 2, "Category")
+        ws.cell(1, 3, "Judgement %")
+        ws.cell(1, 4, "Confidence")
         y = ws.max_row
         print(y)
         y += 1
@@ -109,14 +113,16 @@ def saveExcelFormat(judgementList, sheetname, percentages, filename, append = Fa
             sentimentList.append(cellObj.value)
         percentages = updatePercentages(sentimentList)
         y=1
-        for percentage in percentages:
-            ws.cell(y,5, percentage[y-1][0] + " " + str(percentages[y-1][1]) + "%")
+        for sent, conf in percentages:
+            print(percentages[y-1][0])
+            ws.cell(y,5, percentages[y-1][0] + " " + str(percentages[y-1][1]) + "%")
+            y +=1
 
         wb.save(filename)
 
 
     else:
-        wb = Workbook()
+        wb = load_workbook(filename)
         ws = wb.create_sheet(sheetname, 0)
         ws.cell(1,1,"Filename")
         ws.cell(1,2, "Category")
@@ -153,3 +159,25 @@ def updatePercentages(totalJudgements):
     percentages = [(i, c[i] / len(totalJudgements) * 100) for i, count in c.most_common()]
     print(percentages)
     return percentages
+
+def saveToNewExcelfile(judgementList, sheetname, percentages, filename):
+    wb = Workbook()
+    ws = wb.create_sheet(sheetname, 0)
+    ws.cell(1, 1, "Filename")
+    ws.cell(1, 2, "Category")
+    ws.cell(1, 3, "Judgement %")
+    ws.cell(1, 4, "Confidence")
+    y = 1
+    for sent, conf in percentages:
+        ws.cell(y, 5, percentages[y - 1][0] + " " + str(percentages[y - 1][1]) + "%")
+        y += 1
+    y = 2
+    for fn, judgement in judgementList:
+        ws.cell(y, 1, fn[0])
+        ws.cell(y, 2, fn[1])
+        ws.cell(y, 3, judgement[0])
+        ws.cell(y, 4, judgement[1] * 100)
+        y += 1
+    print("Max row:", ws.max_row)
+    print("Max column:", ws.max_column)
+    wb.save(filename)
